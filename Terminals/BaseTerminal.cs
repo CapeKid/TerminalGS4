@@ -7,8 +7,121 @@ namespace Terminal.Terminals
     {
         public string Password {get;set;}
         public int LockoutPreventionCount {get;set;}
-
         public bool BigRedButtonActive {get;set;}
+
+        public virtual void NormalTerminalUsage()
+        {
+            if(LockoutPreventionCount > 0)
+                LockoutPreventionCount--;
+            PrintTerminalInstructions();
+            
+            ConsoleKeyInfo key = Console.ReadKey();
+            Console.WriteLine();
+            Options(key);
+        }
+
+        public virtual void Options(ConsoleKeyInfo key){
+            switch(key.Key)
+            {
+                case ConsoleKey.A:
+                    InfoRequest();
+                    break;
+                case ConsoleKey.B:
+                    SetPassword();
+                    break;
+                case ConsoleKey.C:
+                    PreventLockout();
+                    break;
+                case ConsoleKey.D:
+                    BigRedButton();
+                    break;
+                case ConsoleKey.E:
+                    BigRedButtonOff();
+                    break;
+                case ConsoleKey.F:
+                    string toOnOff = BigRedButtonActive ? "ON" : "OFF";
+                    Console.WriteLine($"Current big red button status is \"{toOnOff}\"");
+                    break;
+                case ConsoleKey.Z:
+                    RemovePassword();
+                    break;
+                case ConsoleKey.Oem3:
+                case ConsoleKey.OemComma:
+                    Console.WriteLine("Accessing director functions...");
+                    Console.WriteLine("If you are using this and are not Seth or Megan, you are cheating and ruining the game for everyone.");
+                    DirectorUsage();
+                    break;
+                default:
+                    Console.WriteLine("Invalid input. Press ESC to stop");
+                    break;
+            }
+        }
+        
+        public void PasswordUsage(){
+            if(Password != null)
+            {
+                Console.WriteLine("There is a password set on this terminal");
+                Console.WriteLine("Press A to enter password");
+                Console.WriteLine("Press B to attempt to break password security");
+                
+                ConsoleKeyInfo key = Console.ReadKey();
+                Console.WriteLine();
+                switch(key.Key)
+                {
+                    case ConsoleKey.A:
+                        if(EnterPassword()){
+                            NormalTerminalUsage();
+                        }
+                        break;
+                    case ConsoleKey.B:
+                        BreakPassword();
+                        break;
+                    case ConsoleKey.Oem3:
+                    case ConsoleKey.OemComma:
+                        Console.WriteLine("Accessing director functions...");
+                        Console.WriteLine("If you are using this and are not Seth or Megan, you are cheating and ruining the game for everyone.");
+                        DirectorUsage();
+                        break;
+                }
+            }
+            else{
+                NormalTerminalUsage();   
+            }
+        }
+
+        public void DirectorUsage()
+        {
+            Console.WriteLine("Press A to print password");
+            Console.WriteLine("Press B to check lockout prevention");
+            Console.WriteLine("Press C to activate big red button");
+            Console.WriteLine("Press D to de-activate big red button");
+            Console.WriteLine("Press , resume normal function");
+            
+            ConsoleKeyInfo key = Console.ReadKey();
+            Console.WriteLine();
+            switch(key.Key)
+            {
+                case ConsoleKey.A:
+                    Console.WriteLine($"Current password is {Password}");
+                    break;
+                case ConsoleKey.B:
+                    Console.WriteLine($"Current lockout prevention count is {LockoutPreventionCount}");
+                    break;
+                case ConsoleKey.C:
+                    BigRedButtonActive = true;
+                    break;
+                case ConsoleKey.D:
+                    BigRedButtonActive = false;
+                    break;
+                case ConsoleKey.OemComma:
+                    Console.WriteLine("Resuming normal functions...");
+                    NormalTerminalUsage();
+                    break;
+                default:
+                    Console.WriteLine("Invalid input. Press ESC to stop");
+                    break;
+            }
+        }
 
         public virtual void PrintTerminalInstructions()
         {
@@ -18,6 +131,14 @@ namespace Terminal.Terminals
             Console.WriteLine("Press D to press BIG RED BUTTON");
             Console.WriteLine("Press E to turn off your own BIG RED BUTTON");
             Console.WriteLine("Press F to check BIG RED BUTTON status");
+            if(!String.IsNullOrEmpty(Password))
+                Console.WriteLine("Press Z to Remove Current Password");
+        }
+
+        public void RemovePassword()
+        {
+            Console.WriteLine("Removing Password...");
+            Password = null;
         }
 
         public void InfoRequest()
@@ -30,11 +151,11 @@ namespace Terminal.Terminals
 
         public void SetPassword()
         {
-            Console.WriteLine("Set a password to use this terminal. (ESC to cancel):");
+            Console.WriteLine("Choose a password to use for this terminal. (ESC to cancel):");
             string tempPassword1 = ReadLineWithCancel();
             if(tempPassword1 == null)
                 return;
-            Console.WriteLine(Environment.NewLine + "Confirm password to use this terminal. (ESC to cancel):");
+            Console.WriteLine(Environment.NewLine + "Confirm password to use for this terminal. (ESC to cancel):");
             string tempPassword2 = ReadLineWithCancel();
             if(tempPassword2 == null)
                 return;

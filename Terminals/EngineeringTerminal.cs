@@ -9,5 +9,17 @@ namespace Terminal.Terminals
         {
             base.PrintTerminalInstructions();
         }
+
+        public override void NormalTerminalUsage()
+        {
+            PrintTerminalInstructions();
+            ConsoleKeyInfo key = Console.ReadKey();
+            Console.WriteLine();
+            Options(key);
+        }        
+
+        public override void Options(ConsoleKeyInfo key){
+            base.Options(key);
+        }
     }
 }
