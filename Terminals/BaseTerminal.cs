@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Terminal.Terminals
@@ -8,6 +9,25 @@ namespace Terminal.Terminals
         public string Password {get;set;}
         public int LockoutPreventionCount {get;set;}
         public bool BigRedButtonActive {get;set;}
+
+        private Dictionary<List<ConsoleKey>, (string instruction, Action action)> mappings;
+
+        public BaseTerminal(){
+            InitMappings();
+        }
+
+        private void InitMappings(){
+            mappings = new Dictionary<List<ConsoleKey>, (string instruction, Action action)>(){
+                { new List<ConsoleKey> { ConsoleKey.A }, ( "someInstruction",  () => InfoRequest() ) },
+                { new List<ConsoleKey> { ConsoleKey.B }, ( "someInstruction",  () => SetPassword() ) },
+                { new List<ConsoleKey> { ConsoleKey.C }, ( "someInstruction",  () => PreventLockout() ) },
+                { new List<ConsoleKey> { ConsoleKey.D }, ( "someInstruction",  () => BigRedButton() ) },
+                { new List<ConsoleKey> { ConsoleKey.E }, ( "someInstruction",  () => BigRedButtonOff() ) }, //!!!Change this to only show when button is on
+                { new List<ConsoleKey> { ConsoleKey.F }, ( "someInstruction",  () => BigRedButtonState() ) },
+                { new List<ConsoleKey> { ConsoleKey.Z }, ( "someInstruction",  () => RemovePassword() ) },
+                { new List<ConsoleKey> { ConsoleKey.Oem3, ConsoleKey.OemComma }, ( "someInstruction",  () => DirectorUsage() ) },
+            };
+        }
 
         public virtual void NormalTerminalUsage()
         {
@@ -21,40 +41,19 @@ namespace Terminal.Terminals
         }
 
         public virtual void Options(ConsoleKeyInfo key){
-            switch(key.Key)
-            {
-                case ConsoleKey.A:
-                    InfoRequest();
-                    break;
-                case ConsoleKey.B:
-                    SetPassword();
-                    break;
-                case ConsoleKey.C:
-                    PreventLockout();
-                    break;
-                case ConsoleKey.D:
-                    BigRedButton();
-                    break;
-                case ConsoleKey.E:
-                    BigRedButtonOff();
-                    break;
-                case ConsoleKey.F:
-                    string toOnOff = BigRedButtonActive ? "ON" : "OFF";
-                    Console.WriteLine($"Current big red button status is \"{toOnOff}\"");
-                    break;
-                case ConsoleKey.Z:
-                    RemovePassword();
-                    break;
-                case ConsoleKey.Oem3:
-                case ConsoleKey.OemComma:
-                    Console.WriteLine("Accessing director functions...");
-                    Console.WriteLine("If you are using this and are not Seth or Megan, you are cheating and ruining the game for everyone.");
-                    DirectorUsage();
-                    break;
-                default:
-                    Console.WriteLine("Invalid input. Press ESC to stop");
-                    break;
+            foreach(var mappingList in mappings){
+                if(mappingList.Key.Contains(key.Key))
+                {
+                    mappingList.Value.action.Invoke();
+                    return;
+                }
             }
+            Console.WriteLine("Invalid input. Press ESC to stop");
+        }
+
+        private void BigRedButtonState(){
+            string toOnOff = BigRedButtonActive ? "ON" : "OFF";
+            Console.WriteLine($"Current big red button status is \"{toOnOff}\"");
         }
         
         public void PasswordUsage(){
@@ -91,6 +90,8 @@ namespace Terminal.Terminals
 
         public void DirectorUsage()
         {
+            Console.WriteLine("Accessing director functions...");
+            Console.WriteLine("If you are using this and are not Seth or Megan, you are cheating and ruining the game for everyone.");
             Console.WriteLine("Press A to print password");
             Console.WriteLine("Press B to check lockout prevention");
             Console.WriteLine("Press C to activate big red button");
