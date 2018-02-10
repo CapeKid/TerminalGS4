@@ -18,20 +18,23 @@ namespace Terminal.Terminals
 
         private void InitMappings(){
             Mappings = new Dictionary<List<ConsoleKey>, (string instruction, Action action, Func<bool> appearanceCondition)>(){
-                { new List<ConsoleKey> { ConsoleKey.A }, ( "Press A to request info",  () => InfoRequest(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.B }, ( "Press B to set a password on this terminal",  () => SetPassword(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.C }, ( "Press C to prevent lockout",  () => PreventLockout(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.D }, ( "Press D to press BIG RED BUTTON",  () => BigRedButton(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.E }, ( "Press E to turn off your own BIG RED BUTTON",  () => BigRedButtonOff(), null ) }, //!!!Change this to only show when button is on
-                { new List<ConsoleKey> { ConsoleKey.F }, ( "Press F to check BIG RED BUTTON status",  () => BigRedButtonState(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.Z }, ( "Press Z to Remove Current Password",  () => RemovePassword(), () => IsPasswordSet()) },
-                { new List<ConsoleKey> { ConsoleKey.Oem3, ConsoleKey.OemComma }, ( null,  () => DirectorUsage(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.A },
+                    ( "Press A to request info",  () => InfoRequest(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.B },
+                    ( "Press B to set a password on this terminal",  () => SetPassword(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.C },
+                    ( "Press C to prevent lockout",  () => PreventLockout(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.D },
+                    ( "Press D to press BIG RED BUTTON",  () => BigRedButton(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.E },
+                    ( "Press E to turn off your own BIG RED BUTTON",  () => BigRedButtonOff(), () => {return BigRedButtonActive;}) },
+                { new List<ConsoleKey> { ConsoleKey.F },
+                    ( "Press F to check BIG RED BUTTON status",  () => BigRedButtonState(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.Z },
+                    ( "Press Z to Remove Current Password",  () => RemovePassword(), () => {return !String.IsNullOrEmpty(Password);}) },
+                { new List<ConsoleKey> { ConsoleKey.Oem3, ConsoleKey.OemComma },
+                    ( null,  () => DirectorUsage(), null ) },
             };
-        }
-
-        private bool IsPasswordSet()
-        {
-            return !String.IsNullOrEmpty(Password);
         }
 
         public virtual void NormalTerminalUsage()
@@ -174,7 +177,7 @@ namespace Terminal.Terminals
         public void BigRedButton(){
             Console.WriteLine("Puts up shields that prevent all movement in or out of the seats next to all terminals.");
             Console.WriteLine("No physical actions or abilities can cross the shields.");
-            Console.WriteLine("However sound, light and air can.");
+            Console.WriteLine("However sound, light, and air can.");
             Console.WriteLine("Social and emotional abilities can still cross.");
             Console.WriteLine("The alien tech laser can destroy one of the shields in one weapons use.");
             Console.WriteLine("\"y\" to activate the BIG RED BUTTON (ESC to cancel):");
