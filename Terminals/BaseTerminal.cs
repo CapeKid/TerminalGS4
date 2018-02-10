@@ -10,23 +10,28 @@ namespace Terminal.Terminals
         public int LockoutPreventionCount {get;set;}
         public bool BigRedButtonActive {get;set;}
 
-        private Dictionary<List<ConsoleKey>, (string instruction, Action action)> mappings;
+        private Dictionary<List<ConsoleKey>, (string instruction, Action action, Func<bool> appearanceCondition)> Mappings {get;set;}
 
         public BaseTerminal(){
             InitMappings();
         }
 
         private void InitMappings(){
-            mappings = new Dictionary<List<ConsoleKey>, (string instruction, Action action)>(){
-                { new List<ConsoleKey> { ConsoleKey.A }, ( "someInstruction",  () => InfoRequest() ) },
-                { new List<ConsoleKey> { ConsoleKey.B }, ( "someInstruction",  () => SetPassword() ) },
-                { new List<ConsoleKey> { ConsoleKey.C }, ( "someInstruction",  () => PreventLockout() ) },
-                { new List<ConsoleKey> { ConsoleKey.D }, ( "someInstruction",  () => BigRedButton() ) },
-                { new List<ConsoleKey> { ConsoleKey.E }, ( "someInstruction",  () => BigRedButtonOff() ) }, //!!!Change this to only show when button is on
-                { new List<ConsoleKey> { ConsoleKey.F }, ( "someInstruction",  () => BigRedButtonState() ) },
-                { new List<ConsoleKey> { ConsoleKey.Z }, ( "someInstruction",  () => RemovePassword() ) },
-                { new List<ConsoleKey> { ConsoleKey.Oem3, ConsoleKey.OemComma }, ( "someInstruction",  () => DirectorUsage() ) },
+            Mappings = new Dictionary<List<ConsoleKey>, (string instruction, Action action, Func<bool> appearanceCondition)>(){
+                { new List<ConsoleKey> { ConsoleKey.A }, ( "Press A to request info",  () => InfoRequest(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.B }, ( "Press B to set a password on this terminal",  () => SetPassword(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.C }, ( "Press C to prevent lockout",  () => PreventLockout(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.D }, ( "Press D to press BIG RED BUTTON",  () => BigRedButton(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.E }, ( "Press E to turn off your own BIG RED BUTTON",  () => BigRedButtonOff(), null ) }, //!!!Change this to only show when button is on
+                { new List<ConsoleKey> { ConsoleKey.F }, ( "Press F to check BIG RED BUTTON status",  () => BigRedButtonState(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.Z }, ( "Press Z to Remove Current Password",  () => RemovePassword(), () => IsPasswordSet()) },
+                { new List<ConsoleKey> { ConsoleKey.Oem3, ConsoleKey.OemComma }, ( null,  () => DirectorUsage(), null ) },
             };
+        }
+
+        private bool IsPasswordSet()
+        {
+            return !String.IsNullOrEmpty(Password);
         }
 
         public virtual void NormalTerminalUsage()
@@ -39,9 +44,16 @@ namespace Terminal.Terminals
             Console.WriteLine();
             Options(key);
         }
+        public virtual void PrintTerminalInstructions()
+        {
+            foreach(var mappingListValue in Mappings.Values){
+                if((mappingListValue.appearanceCondition == null || mappingListValue.appearanceCondition.Invoke()) && mappingListValue.instruction != null)
+                    Console.WriteLine(mappingListValue.instruction);
+            }
+        }
 
         public virtual void Options(ConsoleKeyInfo key){
-            foreach(var mappingList in mappings){
+            foreach(var mappingList in Mappings){
                 if(mappingList.Key.Contains(key.Key))
                 {
                     mappingList.Value.action.Invoke();
@@ -122,18 +134,6 @@ namespace Terminal.Terminals
                     Console.WriteLine("Invalid input. Press ESC to stop");
                     break;
             }
-        }
-
-        public virtual void PrintTerminalInstructions()
-        {
-            Console.WriteLine("Press A to request info");
-            Console.WriteLine("Press B to set a password on this terminal");
-            Console.WriteLine("Press C to prevent lockout");
-            Console.WriteLine("Press D to press BIG RED BUTTON");
-            Console.WriteLine("Press E to turn off your own BIG RED BUTTON");
-            Console.WriteLine("Press F to check BIG RED BUTTON status");
-            if(!String.IsNullOrEmpty(Password))
-                Console.WriteLine("Press Z to Remove Current Password");
         }
 
         public void RemovePassword()
