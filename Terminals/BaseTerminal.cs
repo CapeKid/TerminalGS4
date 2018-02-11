@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Terminal.Terminals
 {
@@ -10,31 +11,85 @@ namespace Terminal.Terminals
         public int LockoutPreventionCount {get;set;}
         public bool BigRedButtonActive {get;set;}
 
-        private Dictionary<List<ConsoleKey>, (string instruction, Action action, Func<bool> appearanceCondition)> Mappings {get;set;}
+        public List<Mode> CurrentModes {get;set;}
+        public Dictionary<Mode, Dictionary<List<ConsoleKey>, KeyFunctionDTO>> AllModes {get;set;}
 
         public BaseTerminal(){
-            InitMappings();
+            InitModes();
         }
 
-        private void InitMappings(){
-            Mappings = new Dictionary<List<ConsoleKey>, (string instruction, Action action, Func<bool> appearanceCondition)>(){
+        private void InitModes(){
+            CurrentModes = new List<Mode>();
+            CurrentModes.Add(Mode.Normal);
+            AllModes = new Dictionary<Mode, Dictionary<List<ConsoleKey>, KeyFunctionDTO>>(){
+                {Mode.Normal, NormalMappings()},
+                {Mode.Director, DirectorMappings()}
+                };
+        }
+
+        private Dictionary<List<ConsoleKey>, KeyFunctionDTO> NormalMappings(){
+            return new Dictionary<List<ConsoleKey>, KeyFunctionDTO>(){ 
                 { new List<ConsoleKey> { ConsoleKey.A },
-                    ( "Press A to request info",  () => InfoRequest(), null ) },
+                    new KeyFunctionDTO ( "Press A to request info" ,  () => InfoRequest(), null ) },
                 { new List<ConsoleKey> { ConsoleKey.B },
-                    ( "Press B to set a password on this terminal",  () => SetPassword(), null ) },
+                    new KeyFunctionDTO ( "Press B to set a password on this terminal",  () => SetPassword(), null ) },
                 { new List<ConsoleKey> { ConsoleKey.C },
-                    ( "Press C to prevent lockout",  () => PreventLockout(), null ) },
+                    new KeyFunctionDTO ( "Press C to prevent lockout",  () => PreventLockout(), null ) },
                 { new List<ConsoleKey> { ConsoleKey.D },
-                    ( "Press D to press BIG RED BUTTON",  () => BigRedButton(), null ) },
+                    new KeyFunctionDTO ( "Press D to press BIG RED BUTTON",  () => BigRedButton(), null ) },
                 { new List<ConsoleKey> { ConsoleKey.E },
-                    ( "Press E to turn off your own BIG RED BUTTON",  () => BigRedButtonOff(), () => {return BigRedButtonActive;}) },
+                    new KeyFunctionDTO ( "Press E to turn off your own BIG RED BUTTON",  () => BigRedButtonOff(), () => {return BigRedButtonActive;}) },
                 { new List<ConsoleKey> { ConsoleKey.F },
-                    ( "Press F to check BIG RED BUTTON status",  () => BigRedButtonState(), null ) },
+                    new KeyFunctionDTO ( "Press F to check BIG RED BUTTON status",  () => BigRedButtonState(), null ) },
                 { new List<ConsoleKey> { ConsoleKey.Z },
-                    ( "Press Z to Remove Current Password",  () => RemovePassword(), () => {return !String.IsNullOrEmpty(Password);}) },
+                    new KeyFunctionDTO ( "Press Z to Remove Current Password",  () => RemovePassword(), () => {return !String.IsNullOrEmpty(Password);}) },
                 { new List<ConsoleKey> { ConsoleKey.Oem3, ConsoleKey.OemComma },
-                    ( null,  () => DirectorUsage(), null ) },
+                    new KeyFunctionDTO ( null,  () => DirectorUsage(), null ) },
             };
+        }
+
+        public void DirectorUsage()
+        {
+            Console.WriteLine("Accessing director functions...");
+            Console.WriteLine("If you are using this and are not Seth or Megan, you are cheating and ruining the game for everyone.");
+            CurrentModes.Remove(Mode.Normal);
+            CurrentModes.Add(Mode.Director);
+        }
+
+        public void NormalUsage()
+        {
+            Console.WriteLine("Accessing normal functions...");
+            CurrentModes.Remove(Mode.Director);
+            CurrentModes.Add(Mode.Normal);
+        }
+
+        public Dictionary<List<ConsoleKey>, KeyFunctionDTO> DirectorMappings()
+        {
+            return new Dictionary<List<ConsoleKey>, KeyFunctionDTO>(){ 
+                { new List<ConsoleKey> { ConsoleKey.A },
+                    new KeyFunctionDTO ( "Press A to print password" ,  () => PrintPassword(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.B },
+                    new KeyFunctionDTO ( "Press B to check lockout prevention",  () => PrintLockoutPreventionCount(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.C },
+                    new KeyFunctionDTO ( "Press C to activate big red button",  () => ActivateBigRedButton(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.D },
+                    new KeyFunctionDTO ( "Press D to de-activate big red button",  () => DeactivateBigRedButton(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.Oem3, ConsoleKey.OemComma },
+                    new KeyFunctionDTO ( "Press , resume normal function",  () => NormalUsage(), () => {return BigRedButtonActive;}) },
+            };
+        }
+
+        private Dictionary<List<ConsoleKey>, KeyFunctionDTO> GetCurrentMappings()
+        {
+            Dictionary<List<ConsoleKey>, KeyFunctionDTO> currentMappings = new Dictionary<List<ConsoleKey>, KeyFunctionDTO>();
+            foreach(var mode in CurrentModes)
+            {
+                foreach(var mapping in AllModes[mode])
+                {
+                    currentMappings.Add(mapping.Key, mapping.Value);
+                }
+            }
+            return currentMappings;
         }
 
         public virtual void NormalTerminalUsage()
@@ -49,17 +104,17 @@ namespace Terminal.Terminals
         }
         public virtual void PrintTerminalInstructions()
         {
-            foreach(var mappingListValue in Mappings.Values){
-                if((mappingListValue.appearanceCondition == null || mappingListValue.appearanceCondition.Invoke()) && mappingListValue.instruction != null)
-                    Console.WriteLine(mappingListValue.instruction);
+            foreach(var mappingListValue in GetCurrentMappings().Values){
+                if((mappingListValue.AppearanceCondition == null || mappingListValue.AppearanceCondition.Invoke()) && mappingListValue.Instruction != null)
+                    Console.WriteLine(mappingListValue.Instruction);
             }
         }
 
         public virtual void Options(ConsoleKeyInfo key){
-            foreach(var mappingList in Mappings){
+            foreach(var mappingList in GetCurrentMappings()){
                 if(mappingList.Key.Contains(key.Key))
                 {
-                    mappingList.Value.action.Invoke();
+                    mappingList.Value.Action.Invoke();
                     return;
                 }
             }
@@ -103,42 +158,6 @@ namespace Terminal.Terminals
             }
         }
 
-        public void DirectorUsage()
-        {
-            Console.WriteLine("Accessing director functions...");
-            Console.WriteLine("If you are using this and are not Seth or Megan, you are cheating and ruining the game for everyone.");
-            Console.WriteLine("Press A to print password");
-            Console.WriteLine("Press B to check lockout prevention");
-            Console.WriteLine("Press C to activate big red button");
-            Console.WriteLine("Press D to de-activate big red button");
-            Console.WriteLine("Press , resume normal function");
-            
-            ConsoleKeyInfo key = Console.ReadKey();
-            Console.WriteLine();
-            switch(key.Key)
-            {
-                case ConsoleKey.A:
-                    Console.WriteLine($"Current password is {Password}");
-                    break;
-                case ConsoleKey.B:
-                    Console.WriteLine($"Current lockout prevention count is {LockoutPreventionCount}");
-                    break;
-                case ConsoleKey.C:
-                    BigRedButtonActive = true;
-                    break;
-                case ConsoleKey.D:
-                    BigRedButtonActive = false;
-                    break;
-                case ConsoleKey.OemComma:
-                    Console.WriteLine("Resuming normal functions...");
-                    NormalTerminalUsage();
-                    break;
-                default:
-                    Console.WriteLine("Invalid input. Press ESC to stop");
-                    break;
-            }
-        }
-
         public void RemovePassword()
         {
             Console.WriteLine("Removing Password...");
@@ -151,6 +170,15 @@ namespace Terminal.Terminals
             var input = Console.ReadLine();
             //!!!Replace with text to me via an API
             Console.WriteLine($"Notify director to recieve information about \"{input}\"");
+        }
+        private void PrintPassword()
+        {
+            Console.WriteLine($"Current password is {Password}");
+        }
+
+        private void PrintLockoutPreventionCount()
+        {
+            Console.WriteLine($"Current lockout prevention count is {LockoutPreventionCount}");
         }
 
         public void SetPassword()
@@ -172,6 +200,13 @@ namespace Terminal.Terminals
                 Console.WriteLine(Environment.NewLine + "Passwords did not match.");
                 return;
             }
+        }
+
+        public void ActivateBigRedButton(){
+            BigRedButtonActive = true;
+        }
+        public void DeactivateBigRedButton(){
+            BigRedButtonActive = false;
         }
 
         public void BigRedButton(){
