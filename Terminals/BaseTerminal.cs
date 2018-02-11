@@ -10,6 +10,7 @@ namespace Terminal.Terminals
         public string Password {get;set;}
         public int LockoutPreventionCount {get;set;}
         public bool BigRedButtonActive {get;set;}
+        public bool AllowNextCommand {get;set;}
 
         public List<Mode> CurrentModes {get;set;}
         public Dictionary<Mode, Dictionary<List<ConsoleKey>, KeyFunctionDTO>> AllModes {get;set;}
@@ -23,7 +24,8 @@ namespace Terminal.Terminals
             CurrentModes.Add(Mode.Normal);
             AllModes = new Dictionary<Mode, Dictionary<List<ConsoleKey>, KeyFunctionDTO>>(){
                 {Mode.Normal, NormalMappings()},
-                {Mode.Director, DirectorMappings()}
+                {Mode.Director, DirectorMappings()},
+                {Mode.Password, PasswordMappings()}
                 };
         }
 
@@ -47,22 +49,7 @@ namespace Terminal.Terminals
                     new KeyFunctionDTO ( null,  () => DirectorUsage(), null ) },
             };
         }
-
-        public void DirectorUsage()
-        {
-            Console.WriteLine("Accessing director functions...");
-            Console.WriteLine("If you are using this and are not Seth or Megan, you are cheating and ruining the game for everyone.");
-            CurrentModes.Remove(Mode.Normal);
-            CurrentModes.Add(Mode.Director);
-        }
-
-        public void NormalUsage()
-        {
-            Console.WriteLine("Accessing normal functions...");
-            CurrentModes.Remove(Mode.Director);
-            CurrentModes.Add(Mode.Normal);
-        }
-
+        
         public Dictionary<List<ConsoleKey>, KeyFunctionDTO> DirectorMappings()
         {
             return new Dictionary<List<ConsoleKey>, KeyFunctionDTO>(){ 
@@ -75,8 +62,47 @@ namespace Terminal.Terminals
                 { new List<ConsoleKey> { ConsoleKey.D },
                     new KeyFunctionDTO ( "Press D to de-activate big red button",  () => DeactivateBigRedButton(), null ) },
                 { new List<ConsoleKey> { ConsoleKey.Oem3, ConsoleKey.OemComma },
-                    new KeyFunctionDTO ( "Press , resume normal function",  () => NormalUsage(), () => {return BigRedButtonActive;}) },
+                    new KeyFunctionDTO ( "Press , resume normal function",  () => TerminalReadLoop(), () => {return BigRedButtonActive;}) },
             };
+        }
+
+        public Dictionary<List<ConsoleKey>, KeyFunctionDTO> PasswordMappings()
+        {
+            return new Dictionary<List<ConsoleKey>, KeyFunctionDTO>(){ 
+                { new List<ConsoleKey> { ConsoleKey.A },
+                    new KeyFunctionDTO ( "Press A to enter password" ,  () => EnterPassword(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.B },
+                    new KeyFunctionDTO ( "Press B to attempt to break password security",  () => BreakPassword(), null ) },
+                { new List<ConsoleKey> { ConsoleKey.Oem3, ConsoleKey.OemComma },
+                    new KeyFunctionDTO ( null,  () => DirectorUsage(), null ) },
+            };
+        }
+
+        public void DirectorUsage()
+        {
+            Console.WriteLine("Accessing director functions...");
+            Console.WriteLine("If you are using this and are not Seth or Megan, you are cheating and ruining the game for everyone.");
+            CurrentModes.Clear();
+            if (!CurrentModes.Contains(Mode.Director))
+                CurrentModes.Add(Mode.Director);
+        }
+
+        public void NormalUsage()
+        {
+            Console.WriteLine("Accessing normal functions...");
+            if (CurrentModes.Contains(Mode.Password))
+                CurrentModes.Remove(Mode.Password);
+            if (!CurrentModes.Contains(Mode.Normal))
+                CurrentModes.Add(Mode.Normal);
+        }
+
+        public void PasswordUsage()
+        {
+            Console.WriteLine("Password is set, using password functions...");
+            if (CurrentModes.Contains(Mode.Normal))
+                CurrentModes.Remove(Mode.Normal);
+            if (!CurrentModes.Contains(Mode.Password))
+                CurrentModes.Add(Mode.Password);
         }
 
         private Dictionary<List<ConsoleKey>, KeyFunctionDTO> GetCurrentMappings()
@@ -92,13 +118,22 @@ namespace Terminal.Terminals
             return currentMappings;
         }
 
-        public virtual void NormalTerminalUsage()
+        public virtual void TerminalReadLoop()
         {
-            if(LockoutPreventionCount > 0)
-                LockoutPreventionCount--;
+            if(Password != null && !AllowNextCommand)
+            {
+                PasswordUsage();
+            }
+            else{
+                NormalUsage();   
+            }
+
             PrintTerminalInstructions();
             
             ConsoleKeyInfo key = Console.ReadKey();
+            if(LockoutPreventionCount > 0)
+                LockoutPreventionCount--;
+
             Console.WriteLine();
             Options(key);
         }
@@ -124,38 +159,6 @@ namespace Terminal.Terminals
         private void BigRedButtonState(){
             string toOnOff = BigRedButtonActive ? "ON" : "OFF";
             Console.WriteLine($"Current big red button status is \"{toOnOff}\"");
-        }
-        
-        public void PasswordUsage(){
-            if(Password != null)
-            {
-                Console.WriteLine("There is a password set on this terminal");
-                Console.WriteLine("Press A to enter password");
-                Console.WriteLine("Press B to attempt to break password security");
-                
-                ConsoleKeyInfo key = Console.ReadKey();
-                Console.WriteLine();
-                switch(key.Key)
-                {
-                    case ConsoleKey.A:
-                        if(EnterPassword()){
-                            NormalTerminalUsage();
-                        }
-                        break;
-                    case ConsoleKey.B:
-                        BreakPassword();
-                        break;
-                    case ConsoleKey.Oem3:
-                    case ConsoleKey.OemComma:
-                        Console.WriteLine("Accessing director functions...");
-                        Console.WriteLine("If you are using this and are not Seth or Megan, you are cheating and ruining the game for everyone.");
-                        DirectorUsage();
-                        break;
-                }
-            }
-            else{
-                NormalTerminalUsage();   
-            }
         }
 
         public void RemovePassword()
@@ -187,6 +190,11 @@ namespace Terminal.Terminals
             string tempPassword1 = ReadLineWithCancel();
             if(tempPassword1 == null)
                 return;
+            if(tempPassword1 == string.Empty)
+            {
+                Console.WriteLine("Entered an empty password!");
+                return;
+            }
             Console.WriteLine(Environment.NewLine + "Confirm password to use for this terminal. (ESC to cancel):");
             string tempPassword2 = ReadLineWithCancel();
             if(tempPassword2 == null)
@@ -285,15 +293,18 @@ namespace Terminal.Terminals
             }
         }
 
-        public bool EnterPassword()
+        public void EnterPassword()
         {
             Console.WriteLine("Enter the current password:");
             var attempt = Console.ReadLine();
-            if(attempt == Password)
+            if(string.Equals(attempt,Password))
             {
-                return true;
+                AllowNextCommand = true;
             }
-            return false;
+            else{
+                Console.WriteLine("You entered the wrong password!");
+                AllowNextCommand = false;
+            }
         }
 
         //Returns null if ESC key pressed during input.

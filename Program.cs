@@ -12,7 +12,7 @@ namespace Terminal
             terminal = new EngineeringTerminal();
                         
             do {
-                    terminal.PasswordUsage();
+                    terminal.TerminalReadLoop();
             } while (true);
         }
     }
