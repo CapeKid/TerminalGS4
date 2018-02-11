@@ -8,7 +8,6 @@ namespace Terminal
         private static BaseTerminal terminal;
         static void Main(string[] args)
         {
-            // terminal = new BaseTerminal();
             terminal = new EngineeringTerminal();
                         
             do {

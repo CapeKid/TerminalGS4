@@ -5,26 +5,20 @@ using System.Linq;
 
 namespace Terminal.Terminals
 {
-    public class BaseTerminal
+    public abstract class BaseTerminal
     {
         public string Password {get;set;}
         public int LockoutPreventionCount {get;set;}
         public bool BigRedButtonActive {get;set;}
         public bool AllowNextCommand {get;set;}
 
-        public List<Mode> CurrentModes {get;set;}
-        public Dictionary<Mode, List<Mapping>> AllModes {get;set;}
+        public List<Mode> CurrentModes {get;set;} = new List<Mode>();
+        public Dictionary<Mode, List<Mapping>> AllModes {get;set;} = new Dictionary<Mode, List<Mapping>>();
 
-        private Stack<ConsoleKey> AvailableKeys {get;set;}
+        protected Stack<ConsoleKey> AvailableKeys {get;set;} = new Stack<ConsoleKey>();
 
-        public BaseTerminal(){
-            InitAvailableKeys();
-            InitModes();
-        }
-
-        private void InitAvailableKeys()
+        protected void InitAvailableKeys()
         {
-            AvailableKeys = new Stack<ConsoleKey>();
             AvailableKeys.Push(ConsoleKey.Z);
             AvailableKeys.Push(ConsoleKey.Y);
             AvailableKeys.Push(ConsoleKey.X);
@@ -53,17 +47,14 @@ namespace Terminal.Terminals
             AvailableKeys.Push(ConsoleKey.A);
         }
 
-        private void InitModes(){
-            CurrentModes = new List<Mode>();
+        protected virtual void InitModes(){
             CurrentModes.Add(Mode.Normal);
-            AllModes = new Dictionary<Mode, List<Mapping>>(){
-                {Mode.Normal, NormalMappings()},
-                {Mode.Director, DirectorMappings()},
-                {Mode.Password, PasswordMappings()}
-                };
+            AllModes.Add(Mode.Normal, NormalMappings());
+            AllModes.Add(Mode.Director, DirectorMappings());
+            AllModes.Add(Mode.Password, PasswordMappings());
         }
 
-        private List<Mapping> NormalMappings(){
+        protected List<Mapping> NormalMappings(){
             return new List<Mapping>{
                 new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to request info" ,  () => InfoRequest(), null )),
                 new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to set a password on this terminal",  () => SetPassword(), null )),
@@ -76,7 +67,7 @@ namespace Terminal.Terminals
             };
         }
         
-        public List<Mapping> DirectorMappings()
+        protected List<Mapping> DirectorMappings()
         {
             return new List<Mapping>(){ 
                 new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to print password" ,  () => PrintPassword(), null )),
@@ -87,7 +78,7 @@ namespace Terminal.Terminals
             };
         }
 
-        public List<Mapping> PasswordMappings()
+        protected List<Mapping> PasswordMappings()
         {
             return new List<Mapping>(){ 
                 new Mapping(AvailableKeys,
@@ -102,27 +93,19 @@ namespace Terminal.Terminals
         {
             Console.WriteLine("Accessing director functions...");
             Console.WriteLine("If you are using this and are not Seth or Megan, you are cheating and ruining the game for everyone.");
-            CurrentModes.Clear();
-            if (!CurrentModes.Contains(Mode.Director))
-                CurrentModes.Add(Mode.Director);
+            OnlyMode(Mode.Director);
         }
 
-        public void NormalUsage()
+        protected virtual void NormalUsage()
         {
             Console.WriteLine("Accessing normal functions...");
-            if (CurrentModes.Contains(Mode.Password))
-                CurrentModes.Remove(Mode.Password);
-            if (!CurrentModes.Contains(Mode.Normal))
-                CurrentModes.Add(Mode.Normal);
+            OnlyMode(Mode.Normal);
         }
 
         public void PasswordUsage()
         {
             Console.WriteLine("Password is set, using password functions...");
-            if (CurrentModes.Contains(Mode.Normal))
-                CurrentModes.Remove(Mode.Normal);
-            if (!CurrentModes.Contains(Mode.Password))
-                CurrentModes.Add(Mode.Password);
+            OnlyMode(Mode.Password);
         }
 
         private Dictionary<ConsoleKey, KeyFunctionDTO> GetCurrentMappings()
@@ -138,14 +121,36 @@ namespace Terminal.Terminals
             return currentMappings;
         }
 
+        protected void OnlyModes(List<Mode> modes)
+        {
+            RemoveAllModesBut(modes);
+            foreach(var mode in modes)
+            {
+                if (!CurrentModes.Contains(mode))
+                CurrentModes.Add(mode);
+            }
+        }
+
+        protected void OnlyMode(Mode mode)
+        {
+            RemoveAllModesBut(mode);
+            if (!CurrentModes.Contains(mode))
+                CurrentModes.Add(mode);
+        }
+
+        private void RemoveAllModesBut(Mode mode){
+            CurrentModes.RemoveAll(x => x != Mode.Director && x != mode);
+        }
+
+        private void RemoveAllModesBut(List<Mode> modes){
+            CurrentModes.RemoveAll(x => x != Mode.Director && !modes.Contains(x));
+        }
+
         public virtual void TerminalReadLoop()
         {
             if(Password != null && !AllowNextCommand)
             {
                 PasswordUsage();
-            }
-            else{
-                NormalUsage();   
             }
 
             PrintTerminalInstructions();
@@ -169,6 +174,7 @@ namespace Terminal.Terminals
             foreach(var mappingList in GetCurrentMappings()){
                 if(mappingList.Key == key.Key)
                 {
+                    AllowNextCommand = false;
                     mappingList.Value.Action.Invoke();
                     return;
                 }

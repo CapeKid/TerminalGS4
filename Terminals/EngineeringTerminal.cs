@@ -6,49 +6,73 @@ namespace Terminal.Terminals
 {
     public class EngineeringTerminal : BaseTerminal
     {
+        private bool isPowerOn = true;
+
         public EngineeringTerminal() : base()
         {
             InitAvailableKeys();
             InitModes();
         }
 
-        private void InitModes()
+        protected override void InitModes()
         {
-            CurrentModes = new List<Mode>();
-            CurrentModes.Add(Mode.Normal);
-            CurrentModes.Add(Mode.Engineering);
-            AllModes = new Dictionary<Mode, List<Mapping>>(){
-                {Mode.Normal, NormalMappings()},
-                {Mode.Director, DirectorMappings()},
-                {Mode.Password, PasswordMappings()}
-                };
+            base.InitModes();
+            AllModes.Add(Mode.Engineering, EngineeringMappings());
+            AllModes.Add(Mode.EngineeringRoomPower, EngineeringRoomPowerMappings());
+            NormalUsage();
         }
 
-        public override void PrintTerminalInstructions()
+        public override void TerminalReadLoop()
         {
-            // Console.WriteLine("You are currently at the ENGINEERING terminal.");
-            // Console.WriteLine("Press G to control room power");
-            // Console.WriteLine("Press H to control weapon power");
-            // Console.WriteLine("Press I to control medical robot power");
-            // Console.WriteLine("Press J to control communications power");
-            // Console.WriteLine("Press K to self destruct station");
-            // Console.WriteLine("Press L to grant or revoke access to the escape pod");
-            //!!!Only if self destruct active
-            //Console.WriteLine("Press M to check self destruct timer");
-            //Console.WriteLine("Press N to cancel self destruct station");
-            base.PrintTerminalInstructions();
+            Console.WriteLine("You are currently at the ENGINEERING terminal.");
+            base.TerminalReadLoop();
+        }
+        private List<Mapping> EngineeringMappings()
+        {
+            return new List<Mapping>{
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control room power" ,  () => PowerUsage(), null )),
+                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control weapon power",  () => SetPassword(), null )),
+                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control medical robot power",  () => PreventLockout(), null )) ,
+                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control communications power",  () => BigRedButton(), null )),
+                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to self destruct station",  () => BigRedButtonOff(), () => {return BigRedButtonActive;})),
+                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to grant or revoke access to the escape pod",  () => BigRedButtonState(), null )),
+                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to check self destruct timer",  () => RemovePassword(), () => {return !String.IsNullOrEmpty(Password);})),
+                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to cancel self destruct station",  () => RemovePassword(), () => {return !String.IsNullOrEmpty(Password);})),
+            };
         }
 
-        // public override void NormalTerminalUsage()
-        // {
-        //     PrintTerminalInstructions();
-        //     ConsoleKeyInfo key = Console.ReadKey();
-        //     Console.WriteLine();
-        //     Options(key);
-        // }  
+        protected override void NormalUsage()
+        {
+            Console.WriteLine("Accessing normal functions...");
+            OnlyModes(new List<Mode> () { Mode.Normal, Mode.Engineering} );
+        }
 
-        public override void Options(ConsoleKeyInfo key){
-            base.Options(key);
+        private List<Mapping> EngineeringRoomPowerMappings()
+        {
+            return new List<Mapping>{
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power ON" ,  () => RoomPower(true), () => {return !isPowerOn;} )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power OFF" ,  () => RoomPower(false), () => {return isPowerOn;}  )),
+            };
+        }
+
+        public void PowerUsage()
+        {
+            OnlyMode(Mode.EngineeringRoomPower);
+        }
+
+        public void RoomPower(bool on){
+            if(on)
+            {
+                Console.WriteLine("Room power is ON. Notify director.");
+                isPowerOn = true;
+            }
+            else
+            {
+                Console.WriteLine("Room power is OFF. Notify director.");
+                isPowerOn = false;
+            }
+
+            NormalUsage();
         }
     }
 }
