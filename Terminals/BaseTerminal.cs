@@ -13,68 +13,88 @@ namespace Terminal.Terminals
         public bool AllowNextCommand {get;set;}
 
         public List<Mode> CurrentModes {get;set;}
-        public Dictionary<Mode, Dictionary<List<ConsoleKey>, KeyFunctionDTO>> AllModes {get;set;}
+        public Dictionary<Mode, List<Mapping>> AllModes {get;set;}
+
+        private Stack<ConsoleKey> AvailableKeys {get;set;}
 
         public BaseTerminal(){
+            InitAvailableKeys();
             InitModes();
+        }
+
+        private void InitAvailableKeys()
+        {
+            AvailableKeys = new Stack<ConsoleKey>();
+            AvailableKeys.Push(ConsoleKey.Z);
+            AvailableKeys.Push(ConsoleKey.Y);
+            AvailableKeys.Push(ConsoleKey.X);
+            AvailableKeys.Push(ConsoleKey.W);
+            AvailableKeys.Push(ConsoleKey.V);
+            AvailableKeys.Push(ConsoleKey.U);
+            AvailableKeys.Push(ConsoleKey.T);
+            AvailableKeys.Push(ConsoleKey.S);
+            AvailableKeys.Push(ConsoleKey.R);
+            AvailableKeys.Push(ConsoleKey.Q);
+            AvailableKeys.Push(ConsoleKey.P);
+            AvailableKeys.Push(ConsoleKey.O);
+            AvailableKeys.Push(ConsoleKey.N);
+            AvailableKeys.Push(ConsoleKey.M);
+            AvailableKeys.Push(ConsoleKey.L);
+            AvailableKeys.Push(ConsoleKey.K);
+            AvailableKeys.Push(ConsoleKey.J);
+            AvailableKeys.Push(ConsoleKey.I);
+            AvailableKeys.Push(ConsoleKey.H);
+            AvailableKeys.Push(ConsoleKey.G);
+            AvailableKeys.Push(ConsoleKey.F);
+            AvailableKeys.Push(ConsoleKey.E);
+            AvailableKeys.Push(ConsoleKey.D);
+            AvailableKeys.Push(ConsoleKey.C);
+            AvailableKeys.Push(ConsoleKey.B);
+            AvailableKeys.Push(ConsoleKey.A);
         }
 
         private void InitModes(){
             CurrentModes = new List<Mode>();
             CurrentModes.Add(Mode.Normal);
-            AllModes = new Dictionary<Mode, Dictionary<List<ConsoleKey>, KeyFunctionDTO>>(){
+            AllModes = new Dictionary<Mode, List<Mapping>>(){
                 {Mode.Normal, NormalMappings()},
                 {Mode.Director, DirectorMappings()},
                 {Mode.Password, PasswordMappings()}
                 };
         }
 
-        private Dictionary<List<ConsoleKey>, KeyFunctionDTO> NormalMappings(){
-            return new Dictionary<List<ConsoleKey>, KeyFunctionDTO>(){ 
-                { new List<ConsoleKey> { ConsoleKey.A },
-                    new KeyFunctionDTO ( "Press A to request info" ,  () => InfoRequest(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.B },
-                    new KeyFunctionDTO ( "Press B to set a password on this terminal",  () => SetPassword(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.C },
-                    new KeyFunctionDTO ( "Press C to prevent lockout",  () => PreventLockout(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.D },
-                    new KeyFunctionDTO ( "Press D to press BIG RED BUTTON",  () => BigRedButton(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.E },
-                    new KeyFunctionDTO ( "Press E to turn off your own BIG RED BUTTON",  () => BigRedButtonOff(), () => {return BigRedButtonActive;}) },
-                { new List<ConsoleKey> { ConsoleKey.F },
-                    new KeyFunctionDTO ( "Press F to check BIG RED BUTTON status",  () => BigRedButtonState(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.Z },
-                    new KeyFunctionDTO ( "Press Z to Remove Current Password",  () => RemovePassword(), () => {return !String.IsNullOrEmpty(Password);}) },
-                { new List<ConsoleKey> { ConsoleKey.Oem3, ConsoleKey.OemComma },
-                    new KeyFunctionDTO ( null,  () => DirectorUsage(), null ) },
+        private List<Mapping> NormalMappings(){
+            return new List<Mapping>{
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to request info" ,  () => InfoRequest(), null )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to set a password on this terminal",  () => SetPassword(), null )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to prevent lockout",  () => PreventLockout(), null )) ,
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to press BIG RED BUTTON",  () => BigRedButton(), null )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn off your own BIG RED BUTTON",  () => BigRedButtonOff(), () => {return BigRedButtonActive;})),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to check BIG RED BUTTON status",  () => BigRedButtonState(), null )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to Remove Current Password",  () => RemovePassword(), () => {return !String.IsNullOrEmpty(Password);})),
+                new Mapping(ConsoleKey.OemComma, new KeyFunctionDTO ( null,  () => DirectorUsage(), null ))
             };
         }
         
-        public Dictionary<List<ConsoleKey>, KeyFunctionDTO> DirectorMappings()
+        public List<Mapping> DirectorMappings()
         {
-            return new Dictionary<List<ConsoleKey>, KeyFunctionDTO>(){ 
-                { new List<ConsoleKey> { ConsoleKey.A },
-                    new KeyFunctionDTO ( "Press A to print password" ,  () => PrintPassword(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.B },
-                    new KeyFunctionDTO ( "Press B to check lockout prevention",  () => PrintLockoutPreventionCount(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.C },
-                    new KeyFunctionDTO ( "Press C to activate big red button",  () => ActivateBigRedButton(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.D },
-                    new KeyFunctionDTO ( "Press D to de-activate big red button",  () => DeactivateBigRedButton(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.Oem3, ConsoleKey.OemComma },
-                    new KeyFunctionDTO ( "Press , resume normal function",  () => TerminalReadLoop(), () => {return BigRedButtonActive;}) },
+            return new List<Mapping>(){ 
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to print password" ,  () => PrintPassword(), null )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to check lockout prevention",  () => PrintLockoutPreventionCount(), null ) ),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to activate big red button",  () => ActivateBigRedButton(), null ) ),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to de-activate big red button",  () => DeactivateBigRedButton(), null ) ),
+                new Mapping(ConsoleKey.OemPeriod, new KeyFunctionDTO ( "Press \".\" resume normal function",  () => TerminalReadLoop(), () => {return BigRedButtonActive;}) ),
             };
         }
 
-        public Dictionary<List<ConsoleKey>, KeyFunctionDTO> PasswordMappings()
+        public List<Mapping> PasswordMappings()
         {
-            return new Dictionary<List<ConsoleKey>, KeyFunctionDTO>(){ 
-                { new List<ConsoleKey> { ConsoleKey.A },
-                    new KeyFunctionDTO ( "Press A to enter password" ,  () => EnterPassword(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.B },
-                    new KeyFunctionDTO ( "Press B to attempt to break password security",  () => BreakPassword(), null ) },
-                { new List<ConsoleKey> { ConsoleKey.Oem3, ConsoleKey.OemComma },
-                    new KeyFunctionDTO ( null,  () => DirectorUsage(), null ) },
+            return new List<Mapping>(){ 
+                new Mapping(AvailableKeys,
+                    new KeyFunctionDTO ( "Press \"{0}\" to enter password" ,  () => EnterPassword(), null )),
+                new Mapping(AvailableKeys,
+                    new KeyFunctionDTO ( "Press \"{0}\" to attempt to break password security",  () => BreakPassword(), null )),
+                new Mapping(ConsoleKey.OemComma, new KeyFunctionDTO ( null,  () => DirectorUsage(), null ))
             };
         }
 
@@ -105,14 +125,14 @@ namespace Terminal.Terminals
                 CurrentModes.Add(Mode.Password);
         }
 
-        private Dictionary<List<ConsoleKey>, KeyFunctionDTO> GetCurrentMappings()
+        private Dictionary<ConsoleKey, KeyFunctionDTO> GetCurrentMappings()
         {
-            Dictionary<List<ConsoleKey>, KeyFunctionDTO> currentMappings = new Dictionary<List<ConsoleKey>, KeyFunctionDTO>();
+            Dictionary<ConsoleKey, KeyFunctionDTO> currentMappings = new Dictionary<ConsoleKey, KeyFunctionDTO>();
             foreach(var mode in CurrentModes)
             {
                 foreach(var mapping in AllModes[mode])
                 {
-                    currentMappings.Add(mapping.Key, mapping.Value);
+                    currentMappings.Add(mapping.Key, mapping.KeyFunctionDTO);
                 }
             }
             return currentMappings;
@@ -147,7 +167,7 @@ namespace Terminal.Terminals
 
         public virtual void Options(ConsoleKeyInfo key){
             foreach(var mappingList in GetCurrentMappings()){
-                if(mappingList.Key.Contains(key.Key))
+                if(mappingList.Key == key.Key)
                 {
                     mappingList.Value.Action.Invoke();
                     return;
