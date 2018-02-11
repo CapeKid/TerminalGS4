@@ -18,7 +18,7 @@ namespace Terminal.Terminals
         {
             base.InitModes();
             AllModes.Add(Mode.Engineering, EngineeringMappings());
-            AllModes.Add(Mode.EngineeringRoomPower, EngineeringRoomPowerMappings());
+            // AllModes.Add(Mode.EngineeringRoomPower, EngineeringRoomPowerMappings());
             NormalUsage();
         }
 
@@ -30,7 +30,9 @@ namespace Terminal.Terminals
         private List<Mapping> EngineeringMappings()
         {
             return new List<Mapping>{
-                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control room power" ,  () => PowerUsage(), null )),
+                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control room power" ,  () => PowerUsage(), null )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power ON" ,  () => RoomPower(true), () => {return !isPowerOn;} )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power OFF" ,  () => RoomPower(false), () => {return isPowerOn;}  )),
                 // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control weapon power",  () => SetPassword(), null )),
                 // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control medical robot power",  () => PreventLockout(), null )) ,
                 // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control communications power",  () => BigRedButton(), null )),
@@ -44,21 +46,21 @@ namespace Terminal.Terminals
         protected override void NormalUsage()
         {
             Console.WriteLine("Accessing normal functions...");
-            OnlyModes(new List<Mode> () { Mode.Normal, Mode.Engineering} );
+            OnlyModes(new List<Mode> () { Mode.Normal, Mode.Engineering } );
         }
 
-        private List<Mapping> EngineeringRoomPowerMappings()
-        {
-            return new List<Mapping>{
-                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power ON" ,  () => RoomPower(true), () => {return !isPowerOn;} )),
-                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power OFF" ,  () => RoomPower(false), () => {return isPowerOn;}  )),
-            };
-        }
+        // private List<Mapping> EngineeringRoomPowerMappings()
+        // {
+        //     return new List<Mapping>{
+        //         new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power ON" ,  () => RoomPower(true), () => {return !isPowerOn;} )),
+        //         new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power OFF" ,  () => RoomPower(false), () => {return isPowerOn;}  )),
+        //     };
+        // }
 
-        public void PowerUsage()
-        {
-            OnlyMode(Mode.EngineeringRoomPower);
-        }
+        // public void PowerUsage()
+        // {
+        //     OnlyMode(Mode.EngineeringRoomPower);
+        // }
 
         public void RoomPower(bool on){
             if(on)

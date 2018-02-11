@@ -174,8 +174,9 @@ namespace Terminal.Terminals
             foreach(var mappingList in GetCurrentMappings()){
                 if(mappingList.Key == key.Key)
                 {
-                    AllowNextCommand = false;
                     mappingList.Value.Action.Invoke();
+                    //!!!Fix various password bugs
+                    AllowNextCommand = false;
                     return;
                 }
             }
