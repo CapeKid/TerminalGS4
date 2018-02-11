@@ -6,16 +6,22 @@ namespace Terminal.Terminals
 {
     public class EngineeringTerminal : BaseTerminal
     {
-        // private Dictionary<List<ConsoleKey>, (string instruction, Action action)> mappings;
-
         public EngineeringTerminal() : base()
         {
-            InitMappings();
+            InitAvailableKeys();
+            InitModes();
         }
 
-        private void InitMappings()
+        private void InitModes()
         {
-            
+            CurrentModes = new List<Mode>();
+            CurrentModes.Add(Mode.Normal);
+            CurrentModes.Add(Mode.Engineering);
+            AllModes = new Dictionary<Mode, List<Mapping>>(){
+                {Mode.Normal, NormalMappings()},
+                {Mode.Director, DirectorMappings()},
+                {Mode.Password, PasswordMappings()}
+                };
         }
 
         public override void PrintTerminalInstructions()
