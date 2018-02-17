@@ -6,7 +6,10 @@ namespace Terminal.Terminals
 {
     public class EngineeringTerminal : BaseTerminal
     {
-        private bool isPowerOn = true;
+        private bool isRoomPowerOn = true;
+        private bool isWeaponPowerOn = true;
+        private bool isMedicalRobotPowerOn = true;
+        private bool isCommunicationsPowerOn = true;
 
         public EngineeringTerminal() : base()
         {
@@ -30,12 +33,18 @@ namespace Terminal.Terminals
         private List<Mapping> EngineeringMappings()
         {
             return new List<Mapping>{
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control room power" ,  () => PowerUsage(), null )),
-                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power ON" ,  () => RoomPower(true), () => {return !isPowerOn;} )),
-                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power OFF" ,  () => RoomPower(false), () => {return isPowerOn;}  )),
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control weapon power",  () => SetPassword(), null )),
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control medical robot power",  () => PreventLockout(), null )) ,
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to control communications power",  () => BigRedButton(), null )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power ON" ,  () => Power("room", out isRoomPowerOn, true), () => {return !isRoomPowerOn;} )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power OFF" ,  () => Power("room", out isRoomPowerOn, false), () => {return isRoomPowerOn;}  )),
+
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn weapon power ON" ,  () => Power("weapon", out isWeaponPowerOn, true), () => {return !isWeaponPowerOn;} )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn weapon power OFF" ,  () => Power("weapon", out isWeaponPowerOn, false), () => {return isWeaponPowerOn;}  )),
+
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn medical robot power ON" ,  () => Power("medical robot", out isMedicalRobotPowerOn, true), () => {return !isMedicalRobotPowerOn;} )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn medical robot power OFF" ,  () => Power("medical robot", out isMedicalRobotPowerOn, false), () => {return isMedicalRobotPowerOn;}  )),
+
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn communications power ON" ,  () => Power("medical robot", out isCommunicationsPowerOn, true), () => {return !isCommunicationsPowerOn;} )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn communications power OFF" ,  () => Power("medical robot", out isCommunicationsPowerOn, false), () => {return isCommunicationsPowerOn;}  )),
+
                 // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to self destruct station",  () => BigRedButtonOff(), () => {return BigRedButtonActive;})),
                 // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to grant or revoke access to the escape pod",  () => BigRedButtonState(), null )),
                 // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to check self destruct timer",  () => RemovePassword(), () => {return !String.IsNullOrEmpty(Password);})),
@@ -62,16 +71,16 @@ namespace Terminal.Terminals
         //     OnlyMode(Mode.EngineeringRoomPower);
         // }
 
-        public void RoomPower(bool on){
+        public void Power(string type, out bool thingToControl, bool on){
             if(on)
             {
-                Console.WriteLine("Room power is ON. Notify director.");
-                isPowerOn = true;
+                Console.WriteLine($"{type} power is ON. Notify director.");
+                thingToControl = true;
             }
             else
             {
-                Console.WriteLine("Room power is OFF. Notify director.");
-                isPowerOn = false;
+                Console.WriteLine($"{type} power is OFF. Notify director.");
+                thingToControl = false;
             }
 
             NormalUsage();
