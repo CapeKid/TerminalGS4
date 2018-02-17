@@ -664,23 +664,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\seth3\\.nuget\\packages\\": {},
+    "C:\\Users\\CapeKid\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Terminal\\Terminal.csproj",
+      "projectUniqueName": "C:\\TerminalGS4\\Terminal.csproj",
       "projectName": "Terminal",
-      "projectPath": "D:\\Terminal\\Terminal.csproj",
-      "packagesPath": "C:\\Users\\seth3\\.nuget\\packages\\",
-      "outputPath": "D:\\Terminal\\obj\\",
+      "projectPath": "C:\\TerminalGS4\\Terminal.csproj",
+      "packagesPath": "C:\\Users\\CapeKid\\.nuget\\packages\\",
+      "outputPath": "C:\\TerminalGS4\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\seth3\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\CapeKid\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.0"

@@ -1,0 +1,10 @@
+C:\TerminalGS4\bin\MCD\Debug\netcoreapp2.0\Terminal.deps.json
+C:\TerminalGS4\bin\MCD\Debug\netcoreapp2.0\Terminal.runtimeconfig.json
+C:\TerminalGS4\bin\MCD\Debug\netcoreapp2.0\Terminal.runtimeconfig.dev.json
+C:\TerminalGS4\bin\MCD\Debug\netcoreapp2.0\Terminal.dll
+C:\TerminalGS4\bin\MCD\Debug\netcoreapp2.0\Terminal.pdb
+C:\TerminalGS4\obj\MCD\Debug\netcoreapp2.0\Terminal.csproj.CoreCompileInputs.cache
+C:\TerminalGS4\obj\MCD\Debug\netcoreapp2.0\Terminal.AssemblyInfoInputs.cache
+C:\TerminalGS4\obj\MCD\Debug\netcoreapp2.0\Terminal.AssemblyInfo.cs
+C:\TerminalGS4\obj\MCD\Debug\netcoreapp2.0\Terminal.dll
+C:\TerminalGS4\obj\MCD\Debug\netcoreapp2.0\Terminal.pdb

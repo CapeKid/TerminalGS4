@@ -82,7 +82,7 @@ namespace Terminal.Terminals
         {
             return new List<Mapping>(){ 
                 new Mapping(AvailableKeys,
-                    new KeyFunctionDTO ( "Press \"{0}\" to enter password" ,  () => EnterPassword(), null )),
+                    new KeyFunctionDTO ( "Press \"{0}\" to enter password" ,  () => EnterPassword(), null, breaksPassword: false )),
                 new Mapping(AvailableKeys,
                     new KeyFunctionDTO ( "Press \"{0}\" to attempt to break password security",  () => BreakPassword(), null )),
                 new Mapping(ConsoleKey.OemComma, new KeyFunctionDTO ( null,  () => DirectorUsage(), null ))
@@ -151,6 +151,8 @@ namespace Terminal.Terminals
             if(Password != null && !AllowNextCommand)
             {
                 PasswordUsage();
+            }else{
+                NormalUsage();
             }
 
             PrintTerminalInstructions();
@@ -175,8 +177,8 @@ namespace Terminal.Terminals
                 if(mappingList.Key == key.Key)
                 {
                     mappingList.Value.Action.Invoke();
-                    //!!!Fix various password bugs
-                    AllowNextCommand = false;
+                    if(mappingList.Value.BreaksPassword)
+                        AllowNextCommand = false;
                     return;
                 }
             }
