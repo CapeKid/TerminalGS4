@@ -5,5 +5,4 @@ public enum Mode {
     Engineering,
     Weapon,
     FireWeapon
-    // EngineeringRoomPower
 }
