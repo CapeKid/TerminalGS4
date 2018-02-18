@@ -14,7 +14,7 @@ namespace Terminal.Terminals
         private bool isCommunicationsPowerOn = true;
         private bool isEscapePodOn = true;
         private Stopwatch selfDestructTime = null;
-        private Timer selfDestructEvent = null;
+        private static Timer selfDestructEvent = null;
         private TimeSpan oneHour = new TimeSpan(1,0,0); 
 
         public EngineeringTerminal() : base()
@@ -77,6 +77,7 @@ namespace Terminal.Terminals
         {
             Console.WriteLine("Self destruct canceled...");
             selfDestructTime = null;
+            selfDestructEvent.Stop();
             selfDestructEvent = null;
         }
 
@@ -88,11 +89,11 @@ namespace Terminal.Terminals
             {
                 selfDestructTime = new Stopwatch();
                 selfDestructTime.Start();
-                selfDestructEvent = new Timer(new TimeSpan(1,0,0).TotalMilliseconds);
-                selfDestructEvent.Start();
+                selfDestructEvent = new Timer(oneHour.TotalMilliseconds);
                 //!!!Add director function to set selfdestruct time
-                selfDestructEvent.Enabled = true;
                 selfDestructEvent.Elapsed += HandleStationExplodes;
+                selfDestructEvent.Start();
+                
                 Console.WriteLine("SELF DESTRUCT ACTIVE! NOTIFY DIRECTOR!");
                 return;
             }
@@ -100,7 +101,19 @@ namespace Terminal.Terminals
         
         public static void HandleStationExplodes(object sender, ElapsedEventArgs e)
         {
-            Console.WriteLine("STATION EXPLODES. You dead.");
+            selfDestructEvent.Stop();
+            Console.WriteLine("STATION EXPLODES! You dead.");
+            Console.WriteLine("STATION EXPLODES! You dead.");
+            Console.WriteLine("STATION EXPLODES! You dead.");
+            Console.WriteLine("STATION EXPLODES! You dead.");
+            Console.WriteLine("STATION EXPLODES! You dead.");
+            Console.WriteLine("STATION EXPLODES! You dead.");
+            Console.WriteLine("STATION EXPLODES! You dead.");
+            Console.WriteLine("STATION EXPLODES! You dead.");
+            Console.WriteLine("STATION EXPLODES! You dead.");
+            Console.WriteLine("STATION EXPLODES! You dead.");
+            Console.WriteLine("STATION EXPLODES! You dead.");
+            selfDestructEvent = null;
         }
 
         public void Toggle(string type, out bool thingToControl, bool on){
