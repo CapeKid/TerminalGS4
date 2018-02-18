@@ -185,6 +185,25 @@ namespace Terminal.Terminals
             Console.WriteLine("Invalid input. Press ESC to stop");
         }
 
+        public void Toggle(string extraInfo,
+        out bool thingToControl,
+        bool on,
+        string onString = "{extraInfo} power is ON. Notify director.",
+        string offString = "{extraInfo} power is OFF. Notify director."){
+            if(on)
+            {
+                Console.WriteLine(string.Format(onString, extraInfo));
+                thingToControl = true;
+            }
+            else
+            {
+                Console.WriteLine(string.Format(offString, extraInfo));
+                thingToControl = false;
+            }
+
+            NormalUsage();
+        }
+
         private void BigRedButtonState(){
             string toOnOff = BigRedButtonActive ? "ON" : "OFF";
             Console.WriteLine($"Current big red button status is \"{toOnOff}\"");

@@ -8,7 +8,8 @@ namespace Terminal
         private static BaseTerminal terminal;
         static void Main(string[] args)
         {
-            terminal = new EngineeringTerminal();
+            //!!!Add code to choose terminal type
+            terminal = new WeaponTerminal();
                         
             do {
                     terminal.TerminalReadLoop();

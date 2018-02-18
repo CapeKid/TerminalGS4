@@ -3,5 +3,6 @@ public enum Mode {
     Director,
     Password,
     Engineering,
+    Weapon
     // EngineeringRoomPower
 }

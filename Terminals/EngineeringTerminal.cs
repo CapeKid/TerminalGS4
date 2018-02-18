@@ -51,8 +51,8 @@ namespace Terminal.Terminals
                 new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn communications power ON" ,  () => Toggle("communications", out isCommunicationsPowerOn, true), () => {return !isCommunicationsPowerOn;} )),
                 new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn communications power OFF" ,  () => Toggle("communications", out isCommunicationsPowerOn, false), () => {return isCommunicationsPowerOn;}  )),
 
-                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to GRANT access to the escape pod" ,  () => Toggle("escape pod", out isEscapePodOn, true), () => {return !isEscapePodOn;} )),
-                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to REVOKE access to the escape pod" ,  () => Toggle("escape pod", out isEscapePodOn, false), () => {return isEscapePodOn;}  )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to GRANT access to the escape pod" ,  () => Toggle("escape pod", out isEscapePodOn, true, "Escape pod access is ON. Notify director.", "Escape pod access is OFF. Notify director."), () => {return !isEscapePodOn;} )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to REVOKE access to the escape pod" ,  () => Toggle("escape pod", out isEscapePodOn, false, "Escape pod access is ON. Notify director.", "Escape pod access is OFF. Notify director."), () => {return isEscapePodOn;}  )),
 
                 new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to self destruct station" ,  () => SelfDestruct(), () => {return selfDestructTime == null;}  )),
                 new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to cancel self destruct station" ,  () => CancelSelfDestruct(), () => {return selfDestructTime != null;}  )),
@@ -108,37 +108,7 @@ namespace Terminal.Terminals
             Console.WriteLine("STATION EXPLODES! You dead.");
             Console.WriteLine("STATION EXPLODES! You dead.");
             Console.WriteLine("STATION EXPLODES! You dead.");
-            Console.WriteLine("STATION EXPLODES! You dead.");
-            Console.WriteLine("STATION EXPLODES! You dead.");
-            Console.WriteLine("STATION EXPLODES! You dead.");
             selfDestructEvent = null;
-        }
-
-        public void Toggle(string type, out bool thingToControl, bool on){
-            if(on)
-            {
-                if(type.Equals("escape pod"))
-                {
-                    Console.WriteLine($"Escape pod access is ON. Notify director.");
-                }
-                else{
-                    Console.WriteLine($"{type} power is ON. Notify director.");
-                }
-                thingToControl = true;
-            }
-            else
-            {
-                if(type.Equals("escape pod"))
-                {
-                    Console.WriteLine($"Escape pod access is OFF. Notify director.");
-                }
-                else{
-                    Console.WriteLine($"{type} power is OFF. Notify director.");
-                }
-                thingToControl = false;
-            }
-
-            NormalUsage();
         }
     }
 }
