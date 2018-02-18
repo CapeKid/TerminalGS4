@@ -331,6 +331,7 @@ namespace Terminal.Terminals
             if(attempt > 100)
             {
                 Console.WriteLine("Password removed");
+                NormalUsage();
                 Password = null;
             }
             else{

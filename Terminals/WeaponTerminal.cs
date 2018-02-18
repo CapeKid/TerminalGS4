@@ -90,10 +90,19 @@ namespace Terminal.Terminals
 
             if(contingent == Contingent.Cerian)
                 cerianPlanets--;
-                        
+
+            string target = String.Empty;
+            if(contingent == Contingent.Other)
+            {
+                Console.WriteLine("Notify director what you would like to blow up, then enter it here (ESC to cancel):");
+                target = ReadLineWithCancel();
+                if(target == null)
+                    return;
+            }
+            
             remainingFireCount--;
             RemainingPlanets(contingent);
-            Console.WriteLine("You have blown up " + DescribeTarget(contingent));
+            Console.WriteLine("You have blown up " + (contingent == Contingent.Other ? ("\"" + target + "\"!") : DescribeTarget(contingent)));
         }
 
         private void RemainingPlanets(Contingent contingent){
