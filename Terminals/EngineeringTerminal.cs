@@ -83,10 +83,8 @@ namespace Terminal.Terminals
         private void SelfDestruct()
         {
             Console.WriteLine("Press 'y' to force station to self destruct in 1 hour!");
-            string confirm = ReadLineWithCancel();
-            if(confirm == null)
-                return;
-            if(confirm == "y")
+            char confirm = Console.ReadKey().KeyChar;
+            if(confirm == 'y')
             {
                 selfDestructTime = new Stopwatch();
                 selfDestructTime.Start();

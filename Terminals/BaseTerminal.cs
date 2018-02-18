@@ -252,12 +252,10 @@ namespace Terminal.Terminals
             Console.WriteLine("However sound, light, and air can.");
             Console.WriteLine("Social and emotional abilities can still cross.");
             Console.WriteLine("The alien tech laser can destroy one of the shields in one weapons use.");
-            Console.WriteLine("\"y\" to activate the BIG RED BUTTON (ESC to cancel):");
-            string activateButton = ReadLineWithCancel();
-            if(activateButton == null)
-                return;
+            Console.WriteLine("Press 'y' to activate the BIG RED BUTTON (ESC to cancel):");
+            char activateButton = Console.ReadKey().KeyChar;
             
-            if(string.Equals(activateButton, "y", StringComparison.InvariantCultureIgnoreCase))
+            if(activateButton == 'y')
             {
                 Console.WriteLine("BIG RED BUTTON active, PLEASE NOTIFY DIRECTOR!");
                 BigRedButtonActive = true;
@@ -266,12 +264,10 @@ namespace Terminal.Terminals
 
         public void BigRedButtonOff(){
             Console.WriteLine("You may only turn off the BIG RED BUTTON if you were the one that turned it on.");
-            Console.WriteLine("\"y\" to de-activate the BIG RED BUTTON (ESC to cancel):");
-            string deactivateButton = ReadLineWithCancel();
-            if(deactivateButton == null)
-                return;
+            Console.WriteLine("Press 'y' to de-activate the BIG RED BUTTON (ESC to cancel):");
+            char deactivateButton = Console.ReadKey().KeyChar;
             
-            if(string.Equals(deactivateButton, "y", StringComparison.InvariantCultureIgnoreCase))
+            if(deactivateButton == 'y')
             {
                 Console.WriteLine("BIG RED BUTTON de-activated, PLEASE NOTIFY DIRECTOR!");
                 BigRedButtonActive = false;
