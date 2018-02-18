@@ -67,7 +67,7 @@ namespace Terminal.Terminals
             };
         }
         
-        protected List<Mapping> DirectorMappings()
+        protected virtual List<Mapping> DirectorMappings()
         {
             return new List<Mapping>(){ 
                 new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to print password" ,  () => PrintPassword(), null )),

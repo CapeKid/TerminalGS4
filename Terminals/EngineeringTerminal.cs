@@ -66,7 +66,6 @@ namespace Terminal.Terminals
             OnlyModes(new List<Mode> () { Mode.Normal, Mode.Engineering } );
         }
 
-        
         private void PrintSelfDestruct()
         {
             var timeRemaining = oneHour - selfDestructTime.Elapsed;
@@ -90,7 +89,6 @@ namespace Terminal.Terminals
                 selfDestructTime = new Stopwatch();
                 selfDestructTime.Start();
                 selfDestructEvent = new Timer(oneHour.TotalMilliseconds);
-                //!!!Add director function to set selfdestruct time
                 selfDestructEvent.Elapsed += HandleStationExplodes;
                 selfDestructEvent.Start();
                 
