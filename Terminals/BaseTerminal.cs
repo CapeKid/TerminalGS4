@@ -174,7 +174,7 @@ namespace Terminal.Terminals
 
         public virtual void Options(ConsoleKeyInfo key){
             foreach(var mappingList in GetCurrentMappings()){
-                if(mappingList.Key == key.Key)
+                if(mappingList.Key == key.Key && (mappingList.Value.AppearanceCondition == null || mappingList.Value.AppearanceCondition.Invoke()))
                 {
                     mappingList.Value.Action.Invoke();
                     if(mappingList.Value.BreaksPassword)
@@ -337,7 +337,7 @@ namespace Terminal.Terminals
         }
 
         //Returns null if ESC key pressed during input.
-        private static string ReadLineWithCancel()
+        protected static string ReadLineWithCancel()
         {
             string result = null;
 
