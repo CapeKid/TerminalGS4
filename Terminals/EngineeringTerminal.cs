@@ -70,7 +70,7 @@ namespace Terminal.Terminals
         private void PrintSelfDestruct()
         {
             var timeRemaining = oneHour - selfDestructTime.Elapsed;
-            Console.WriteLine($"There is {timeRemaining.Hours} hours, {timeRemaining.Minutes} minutes, {timeRemaining.Seconds} seconds remaining before self destruct.");
+            Console.WriteLine($"There is {timeRemaining.Hours} hours, {timeRemaining.Minutes} minutes, {timeRemaining.Seconds} seconds, {timeRemaining.Milliseconds} milliseconds remaining before self destruct.");
         }
         
         private void CancelSelfDestruct()
