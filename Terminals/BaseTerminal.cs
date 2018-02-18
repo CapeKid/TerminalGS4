@@ -74,7 +74,7 @@ namespace Terminal.Terminals
                 new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to check lockout prevention",  () => PrintLockoutPreventionCount(), null ) ),
                 new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to activate big red button",  () => ActivateBigRedButton(), null ) ),
                 new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to de-activate big red button",  () => DeactivateBigRedButton(), null ) ),
-                new Mapping(ConsoleKey.OemPeriod, new KeyFunctionDTO ( "Press \".\" resume normal function",  () => TerminalReadLoop(), () => {return BigRedButtonActive;}) ),
+                new Mapping(ConsoleKey.OemPeriod, new KeyFunctionDTO ( "Press \".\" resume normal function",  () => NormalUsage(), null) ),
             };
         }
 
@@ -151,9 +151,10 @@ namespace Terminal.Terminals
             if(Password != null && !AllowNextCommand)
             {
                 PasswordUsage();
-            }else{
-                NormalUsage();
             }
+            // else{
+            //     NormalUsage();
+            // }
 
             PrintTerminalInstructions();
             
@@ -188,8 +189,8 @@ namespace Terminal.Terminals
         public void Toggle(string extraInfo,
         out bool thingToControl,
         bool on,
-        string onString = "{extraInfo} power is ON. Notify director.",
-        string offString = "{extraInfo} power is OFF. Notify director."){
+        string onString = "{0} power is ON. Notify director.",
+        string offString = "{0} power is OFF. Notify director."){
             if(on)
             {
                 Console.WriteLine(string.Format(onString, extraInfo));
@@ -344,6 +345,7 @@ namespace Terminal.Terminals
             if(string.Equals(attempt,Password))
             {
                 AllowNextCommand = true;
+                NormalUsage();
             }
             else{
                 Console.WriteLine("You entered the wrong password!");

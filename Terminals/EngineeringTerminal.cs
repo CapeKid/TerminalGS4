@@ -27,7 +27,6 @@ namespace Terminal.Terminals
         {
             base.InitModes();
             AllModes.Add(Mode.Engineering, EngineeringMappings());
-            // AllModes.Add(Mode.EngineeringRoomPower, EngineeringRoomPowerMappings());
             NormalUsage();
         }
 

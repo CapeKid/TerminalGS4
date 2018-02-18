@@ -8,6 +8,8 @@ namespace Terminal.Terminals
 {
     public class WeaponTerminal : BaseTerminal
     {
+        private bool isAutofireOn = true;
+
         public WeaponTerminal() : base()
         {
             InitAvailableKeys();
@@ -18,8 +20,20 @@ namespace Terminal.Terminals
         {
             base.InitModes();
             AllModes.Add(Mode.Weapon, WeaponMappings());
-            // AllModes.Add(Mode.EngineeringRoomPower, EngineeringRoomPowerMappings());
+            AllModes.Add(Mode.FireWeapon, FireWeaponMappings());
             NormalUsage();
+        }
+
+        private List<Mapping> FireWeaponMappings()
+        {
+            return new List<Mapping>{
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "There are X Union of Planets planets remaining. Press \"{0}\" to fire on a Union of Planets target." ,  () => Toggle("Autofire", out isAutofireOn, true, "{0} is ON. Notify director!",  "{0} is OFF. Notify director!"), () => {return !isAutofireOn;} )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "There are X Cerian planets remaining. Press \"{0}\" to fire on a Cerian target." ,  () => Toggle("Autofire", out isAutofireOn, false, "{0} is ON. Notify director!",  "{0} is OFF. Notify director!"), () => {return isAutofireOn;}  )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "There are X planets total remaining. Press \"{0}\" to fire on an unaffiliated planet." ,  () => Toggle("Autofire", out isAutofireOn, false, "{0} is ON. Notify director!",  "{0} is OFF. Notify director!"), () => {return isAutofireOn;}  )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to fire on some other target." ,  () => Toggle("Autofire", out isAutofireOn, false, "{0} is ON. Notify director!",  "{0} is OFF. Notify director!"), () => {return isAutofireOn;}  )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to return to go back to other terminal options." ,  () => NormalUsage(), null  )),
+                
+            };
         }
 
         public override void TerminalReadLoop()
@@ -30,27 +44,11 @@ namespace Terminal.Terminals
         private List<Mapping> WeaponMappings()
         {
             return new List<Mapping>{
-                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to autofire ON. Autofire is the automatic destruction of anything that approaches the planet." ,  () => Toggle("autofire", out isRoomPowerOn, true), () => {return !isRoomPowerOn;} )),
-                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to autofire OFF.  Autofire is the automatic destruction of anything that approaches the planet." ,  () => Toggle("autofire", out isRoomPowerOn, false), () => {return isRoomPowerOn;}  )),
-
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power ON" ,  () => Toggle("room", out isRoomPowerOn, true), () => {return !isRoomPowerOn;} )),
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn room power OFF" ,  () => Toggle("room", out isRoomPowerOn, false), () => {return isRoomPowerOn;}  )),
-
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn weapon power ON" ,  () => Toggle("weapon", out isWeaponPowerOn, true), () => {return !isWeaponPowerOn;} )),
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn weapon power OFF" ,  () => Toggle("weapon", out isWeaponPowerOn, false), () => {return isWeaponPowerOn;}  )),
-
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn medical robot power ON" ,  () => Toggle("medical robot", out isMedicalRobotPowerOn, true), () => {return !isMedicalRobotPowerOn;} )),
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn medical robot power OFF" ,  () => Toggle("medical robot", out isMedicalRobotPowerOn, false), () => {return isMedicalRobotPowerOn;}  )),
-
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn communications power ON" ,  () => Toggle("communications", out isCommunicationsPowerOn, true), () => {return !isCommunicationsPowerOn;} )),
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to turn communications power OFF" ,  () => Toggle("communications", out isCommunicationsPowerOn, false), () => {return isCommunicationsPowerOn;}  )),
-
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to GRANT access to the escape pod" ,  () => Toggle("escape pod", out isEscapePodOn, true), () => {return !isEscapePodOn;} )),
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to REVOKE access to the escape pod" ,  () => Toggle("escape pod", out isEscapePodOn, false), () => {return isEscapePodOn;}  )),
-
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to self destruct station" ,  () => SelfDestruct(), () => {return selfDestructTime == null;}  )),
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to cancel self destruct station" ,  () => CancelSelfDestruct(), () => {return selfDestructTime != null;}  )),
-                // new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to check self destruct timer" ,  () => PrintSelfDestruct(), () => {return selfDestructTime != null;}  )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to autofire ON. Autofire is the automatic destruction of anything that approaches the planet." ,  () => Toggle("Autofire", out isAutofireOn, true, "{0} is ON. Notify director!",  "{0} is OFF. Notify director!"), () => {return !isAutofireOn;} )),
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to autofire OFF.  Autofire is the automatic destruction of anything that approaches the planet." ,  () => Toggle("Autofire", out isAutofireOn, false, "{0} is ON. Notify director!",  "{0} is OFF. Notify director!"), () => {return isAutofireOn;}  )),
+                
+                new Mapping(AvailableKeys, new KeyFunctionDTO ( "Press \"{0}\" to fire on a target. Check with ENGINEERING terminal to determine if the weapon power is on." ,  () => FireWeaponUsage(), null, breaksPassword: false  )),
+                
                 };
         }
 
@@ -59,6 +57,11 @@ namespace Terminal.Terminals
             Console.WriteLine("Accessing normal functions...");
             OnlyModes(new List<Mode> () { Mode.Normal, Mode.Weapon } );
         }
-
+        
+        private void FireWeaponUsage()
+        {
+            Console.WriteLine("Accessing weapon fire...");
+            OnlyModes(new List<Mode> () { Mode.Normal, Mode.FireWeapon } );
+        }
     }
 }
