@@ -6,5 +6,6 @@ public enum Mode {
     Weapon,
     FireWeapon,
     LifeSupport,
-    Communications
+    Communications,
+    Security
 }
