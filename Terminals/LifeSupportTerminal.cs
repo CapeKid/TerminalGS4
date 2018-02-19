@@ -57,7 +57,7 @@ namespace Terminal.Terminals
 
         public override void TerminalReadLoop()
         {
-            Console.WriteLine("You are currently at the WEAPONS terminal.");
+            Console.WriteLine("You are currently at the LIFE SUPPORT terminal.");
             base.TerminalReadLoop();
         }
 

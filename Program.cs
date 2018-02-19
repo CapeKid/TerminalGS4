@@ -9,7 +9,7 @@ namespace Terminal
         static void Main(string[] args)
         {
             //!!!Add code to choose terminal type
-            terminal = new LifeSupportTerminal();
+            terminal = new CommunicationsTerminal();
                         
             do {
                     terminal.TerminalReadLoop();

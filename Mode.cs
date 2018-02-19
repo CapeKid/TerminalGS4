@@ -5,5 +5,6 @@ public enum Mode {
     Engineering,
     Weapon,
     FireWeapon,
-    LifeSupport
+    LifeSupport,
+    Communications
 }
