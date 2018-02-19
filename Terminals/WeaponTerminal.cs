@@ -137,6 +137,8 @@ namespace Terminal.Terminals
         {
             Console.WriteLine("Accessing normal functions...");
             OnlyModes(new List<Mode> () { Mode.Normal, Mode.Weapon } );
+            if(CurrentModes.Contains(Mode.Director))
+                CurrentModes.Remove(Mode.Director);
         }
         
         private void FireWeaponUsage()

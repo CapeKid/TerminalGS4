@@ -99,7 +99,10 @@ namespace Terminal.Terminals
         protected virtual void NormalUsage()
         {
             Console.WriteLine("Accessing normal functions...");
+
             OnlyMode(Mode.Normal);
+            if(CurrentModes.Contains(Mode.Director))
+                CurrentModes.Remove(Mode.Director);
         }
 
         public void PasswordUsage()
@@ -152,9 +155,6 @@ namespace Terminal.Terminals
             {
                 PasswordUsage();
             }
-            // else{
-            //     NormalUsage();
-            // }
 
             PrintTerminalInstructions();
             
