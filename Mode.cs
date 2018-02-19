@@ -4,5 +4,6 @@ public enum Mode {
     Password,
     Engineering,
     Weapon,
-    FireWeapon
+    FireWeapon,
+    LifeSupport
 }
